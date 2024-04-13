@@ -122,8 +122,8 @@ if __name__ == "__main__":
     print("Generated Ad Script:")
     print(ad_script)
     
-    output_path = "generated_ad_script.txt"
+    output_path = "/Users/numan/Library/CloudStorage/OneDrive-Personal/Google x MHacks/mhacks-google-hackthon/generated_ad_script.txt"
     save_ad_script(ad_script, output_path)
     
-    tts_output_path = "ad_script_audio.mp3"
+    tts_output_path = "/Users/numan/Library/CloudStorage/OneDrive-Personal/Google x MHacks/mhacks-google-hackthon/ad_script_audio.mp3"
     text_to_speech(ad_script, tts_output_path)
