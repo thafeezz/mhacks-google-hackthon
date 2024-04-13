@@ -67,7 +67,7 @@ def analyze_audio_ads(audio_ad_paths, genai_client):
             analysis_results.append((file_handle, summary.text, sentiment.text))
             logging.info(f"Audio analysis completed for: {path}")
         except Exception as e:
-            logging.error(f"Error in audio ad analysis: {e}" )
+            logging.error(f"Error in audio ad analysis: {e}")
     return analysis_results
 
 
@@ -113,7 +113,7 @@ async def genad(user_input: UserInput):
     try:
         # Assuming you would somehow gather audio_ad_paths dynamically or from user input
         audio_ad_paths = [
-            "/home/thafeez/mhacks-google-hackthon/Apple_Ad_1.mp3",
+            "/home/thafeez/mhacks-google-hackthon/assets/Apple_Ad_1.mp3",
             # "Apple_Ad_2.mp3",
             # "Radio_Shack_Ad.mp3",
         ]  # This should be updated to the correct path
