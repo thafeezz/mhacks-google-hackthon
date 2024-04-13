@@ -2,14 +2,22 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 import os
 import logging
+import requests
 import pandas as pd
 import openai
+from pathlib import Path
 
 # Load environment variables
 load_dotenv()
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
+
+# Set the OpenAI API key globally
+openai.api_key = os.getenv("OPENAI_API_KEY")
+if not openai.api_key:
+    logging.error("OpenAI API key is not set.")
+    raise ValueError("OpenAI API key is not set.")
 
 def setup_genai():
     # Retrieve your API key from environment variables
@@ -76,21 +84,21 @@ def save_ad_script(ad_script, output_path):
 
 def text_to_speech(text, output_file):
     try:
-        openai.api_key = os.getenv("OPENAI_API_KEY")
-        if not openai.api_key:
-            logging.error("OpenAI API key is not set.")
-            raise ValueError("OpenAI API key is not set.")
-        
-        speech_file_path = Path(__file__).parent / output_file
-        response = openai.Audio.create(
-            model="tts-1-hd",  # Ensure you have access to this model or change as necessary
+        # Specify the path for the output audio file
+        speech_file_path = Path(output_file).resolve()
+
+        # Generate speech using the specified TTS model and voice
+        response = openai.audio.speech.create(
+            model="tts-1",
             voice="alloy",
             input=text,
-            output_format="mp3"
         )
+
+        # Write the audio data to the file
         with open(speech_file_path, 'wb') as f:
-            f.write(response.data)
+            f.write(response.content)
         logging.info(f"Audio file generated and saved successfully: {speech_file_path}")
+
     except Exception as e:
         logging.error(f"Error generating audio file: {e}")
         raise
@@ -104,7 +112,7 @@ if __name__ == "__main__":
         f"{user_responses['organization_size']} and we stand out by {user_responses['product_differentiator']}."
     )
 
-    audio_ad_paths = ["/Users/numan/Library/CloudStorage/OneDrive-Personal/Google x MHacks/mhacks-google-hackthon/Apple_Ad_1.mp3", "/Users/numan/Library/CloudStorage/OneDrive-Personal/Google x MHacks/mhacks-google-hackthon/Apple_Ad_2.mp3", "/Users/numan/Library/CloudStorage/OneDrive-Personal/Google x MHacks/mhacks-google-hackthon/Radio_Shack_ad.mp3"]
+    audio_ad_paths = ["/Users/numan/Library/CloudStorage/OneDrive-Personal/Google x MHacks/mhacks-google-hackthon/Apple_Ad_1.mp3"]
     genai_client = setup_genai()
     analysis_results = analyze_audio_ads(audio_ad_paths, genai_client)
     
