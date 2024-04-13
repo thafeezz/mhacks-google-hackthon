@@ -1,46 +1,38 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import TypewriterEffect from "./TypewriterEffect";
-import "./InputForm.css"; // Ensure the CSS file is in the same directory
+import "./InputForm.css";
 
 const InputForm = () => {
-  const [formData, setFormData] = useState({
-    company_name: "",
-    product_details: "",
-    organization_size: "",
-    product_differentiator: "",
-  });
   const [adScript, setAdScript] = useState("");
-  const [isLoading, setIsLoading] = useState(false); // State to track loading
-  const [isPlaying, setIsPlaying] = useState(false); // State to track audio playing
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
 
-  const audioRef = useRef(null); // Ref for the audio element
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
-  };
+  const audioRef = useRef(null);
+  const formRef = useRef(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true); // Start loading
+    setIsLoading(true);
+    const formData = new FormData(formRef.current);
+    const data = {
+      company_name: formData.get("company_name"),
+      product_details: formData.get("product_details"),
+      organization_size: formData.get("organization_size"),
+      product_differentiator: formData.get("product_differentiator"),
+    };
+
     try {
-      const response = await axios.post(
-        "http://localhost:8000/genad/",
-        formData
-      );
-      setAdScript(response.data.ad_script);
+      const response = await axios.post("http://localhost:8000/genad/", data);
+      const ad_script = response.data.ad_script;
+      setAdScript(ad_script);
     } catch (error) {
       console.error("Error calling API:", error);
-      setAdScript("Failed to fetch data."); // Handle errors
+      setAdScript("Failed to fetch data.");
     }
-    setIsLoading(false); // End loading
+    setIsLoading(false);
   };
 
-  // Toggle play/pause for the audio
   const togglePlayPause = () => {
     if (audioRef.current) {
       if (!isPlaying) {
@@ -53,35 +45,28 @@ const InputForm = () => {
     }
   };
 
+  useEffect(() => {
+    console.log("InputForm mounted");
+    return () => console.log("InputForm unmounted");
+  }, []);
+
   return (
     <div className="input-form">
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="company_name"
-          value={formData.company_name}
-          onChange={handleChange}
-          placeholder="Company Name"
-        />
+      <form ref={formRef} onSubmit={handleSubmit}>
+        <input type="text" name="company_name" placeholder="Company Name" />
         <input
           type="text"
           name="product_details"
-          value={formData.product_details}
-          onChange={handleChange}
           placeholder="Product Details"
         />
         <input
           type="text"
           name="organization_size"
-          value={formData.organization_size}
-          onChange={handleChange}
           placeholder="Organization Size"
         />
         <input
           type="text"
           name="product_differentiator"
-          value={formData.product_differentiator}
-          onChange={handleChange}
           placeholder="Product Differentiator"
         />
         <button type="submit" disabled={isLoading}>
