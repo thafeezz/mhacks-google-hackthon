@@ -8,6 +8,8 @@ const TypewriterEffect = ({ text }) => {
     const allWords = text.split(" ");
     setCurrentText(""); // Clear previous text
 
+    console.log("Typewriter effect started: ", text); // Debug log
+
     const intervalId = setInterval(() => {
       if (index < allWords.length) {
         setCurrentText((prev) => prev + allWords[index] + " ");
@@ -15,10 +17,10 @@ const TypewriterEffect = ({ text }) => {
       } else {
         clearInterval(intervalId);
       }
-    }, 100); // Set interval to 500ms or any other value to control speed
+    }, 100); // Adjust interval to control the speed of typewriting effect
 
     return () => clearInterval(intervalId);
-  }, [text]);
+  }, [text]); // Ensure it re-runs only when text changes
 
   return <div className="typewriter">{currentText}</div>;
 };

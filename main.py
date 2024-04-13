@@ -132,7 +132,9 @@ async def genad(user_input: UserInput):
         analysis_results = analyze_audio_ads(audio_ad_paths, genai_client)
         ad_script = generate_ad_script(analysis_results, context)
 
-        tts_output_path = "./ad_script_audio.mp3"
+        tts_output_path = (
+            "/home/thafeez/mhacks-google-hackthon/mhacks/public/ad_script_audio.mp3"
+        )
         text_to_speech(ad_script, tts_output_path)
 
         return {"ad_script": ad_script}
