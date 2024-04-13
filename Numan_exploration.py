@@ -89,11 +89,10 @@ def text_to_speech(text, output_file):
 
         # Generate speech using the specified TTS model and voice
         response = openai.audio.speech.create(
-            model="tts-1",
+            model="tts-1-hd",
             voice="alloy",
             input=text,
         )
-
         # Write the audio data to the file
         with open(speech_file_path, 'wb') as f:
             f.write(response.content)
