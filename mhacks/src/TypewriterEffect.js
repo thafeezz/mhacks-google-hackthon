@@ -5,19 +5,19 @@ const TypewriterEffect = ({ text }) => {
 
   useEffect(() => {
     let index = 0;
-    const allWords = text.split(" ");
+    const characters = text.split("");
     setCurrentText(""); // Clear previous text
 
     console.log("Typewriter effect started: ", text); // Debug log
 
     const intervalId = setInterval(() => {
-      if (index < allWords.length) {
-        setCurrentText((prev) => prev + allWords[index] + " ");
+      if (index < characters.length) {
+        setCurrentText((prev) => prev + characters[index]);
         index++;
       } else {
         clearInterval(intervalId);
       }
-    }, 100); // Adjust interval to control the speed of typewriting effect
+    }, 50); // Faster interval for character-by-character
 
     return () => clearInterval(intervalId);
   }, [text]); // Ensure it re-runs only when text changes

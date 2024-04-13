@@ -113,7 +113,7 @@ async def genad(user_input: UserInput):
     try:
         # Assuming you would somehow gather audio_ad_paths dynamically or from user input
         audio_ad_paths = [
-            "/home/thafeez/mhacks-google-hackthon/assets/Apple_Ad_1.mp3",
+            "/Users/numan/Library/CloudStorage/OneDrive-Personal/Google x MHacks/mhacks-google-hackthon/assets/Apple_Ad_1.mp3",
             # "Apple_Ad_2.mp3",
             # "Radio_Shack_Ad.mp3",
         ]  # This should be updated to the correct path
@@ -129,14 +129,14 @@ async def genad(user_input: UserInput):
             f"{user_input.organization_size} and we stand out by {user_input.product_differentiator}."
         )
 
+        # Proceed with processing
         analysis_results = analyze_audio_ads(audio_ad_paths, genai_client)
         ad_script = generate_ad_script(analysis_results, context)
 
-        tts_output_path = (
-            "/home/thafeez/mhacks-google-hackthon/mhacks/public/ad_script_audio.mp3"
-        )
+        tts_output_path = "/Users/numan/Library/CloudStorage/OneDrive-Personal/Google x MHacks/mhacks-google-hackthon/mhacks/public/ad_script_audio.mp3"
         text_to_speech(ad_script, tts_output_path)
 
-        return {"ad_script": ad_script}
+        return {"ad_script": ad_script, "audio_path": tts_output_path}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logging.error(f"An error occurred: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")

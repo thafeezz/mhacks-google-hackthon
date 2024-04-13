@@ -7,8 +7,8 @@ const App = () => {
   return (
     <div className="app-container">
       <header className="app-header">
-        <h1>Hello, User</h1>
-        <h2>How can I help you today?</h2>
+        <h1>Hello, there!</h1>
+        <h2>Generate your custom advertisement below by answering the four question in their boxes.</h2>
       </header>
       <main className="app-main">
         <InputForm />
