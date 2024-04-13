@@ -6,6 +6,10 @@ import requests
 import pandas as pd
 import openai
 from pathlib import Path
+import tkinter as tk
+from tkinter import messagebox, filedialog
+import threading
+import pygame
 
 # Load environment variables
 load_dotenv()
@@ -27,19 +31,6 @@ def setup_genai():
         raise ValueError("Google API key is not set.")
     genai.configure(api_key=google_api_key)
     return genai
-
-def get_user_input():
-    company_name = input("What is your company name and what does it do? ")
-    product_details = input("What is the product you are selling and what does it do? ")
-    organization_size = input("How large is your organization? ")
-    product_differentiator = input("What is one differentiator for your product compared to the marketplace? ")
-    
-    return {
-        "company_name": company_name,
-        "product_details": product_details,
-        "organization_size": organization_size,
-        "product_differentiator": product_differentiator
-    }
 
 def analyze_audio_ads(audio_ad_paths, genai_client):
     analysis_results = []
@@ -65,23 +56,14 @@ def generate_ad_script(analysis_results, context):
             f"Context: {context}, Summary: {summary}, Sentiment: {sentiment}"
             for _, summary, sentiment in analysis_results
         )
-        prompt = f"Generate an engaging audio ad script based on the provided context and audio analysis: '{combined_context}'. Provide only the narrator script, do not not\
-        include any reference to music or sounds, I only what what will be spoken."
+        prompt = f"Follow these instructions very closely: Generate an engaging audio ad script based \
+            on the provided context and audio analysis: '{combined_context}'. Provide only the narrator script, do not not\
+            include any reference to music or sounds, I only what what will be spoken by the narrator."
         response = model.generate_content([prompt])
         return response.text
     except Exception as e:
         logging.error(f"Error generating ad script: {e}")
         raise
-
-def save_ad_script(ad_script, output_path):
-    try:
-        with open(output_path, 'w') as f:
-            f.write(ad_script)
-        logging.info(f"Ad script saved successfully: {output_path}")
-    except Exception as e:
-        logging.error(f"Error saving ad script: {e}")
-        raise
-
 def text_to_speech(text, output_file):
     try:
         # Specify the path for the output audio file
@@ -103,27 +85,116 @@ def text_to_speech(text, output_file):
         raise
 
 
-if __name__ == "__main__":
-    user_responses = get_user_input()
-    context = (
-        f"Introducing a new product from {user_responses['company_name']}, "
-        f"designed for {user_responses['product_details']}. Our company size is "
-        f"{user_responses['organization_size']} and we stand out by {user_responses['product_differentiator']}."
-    )
+class AdGeneratorApp:
+    def __init__(self, master):
+        self.master = master
+        master.title("Ad Generator")
 
-    audio_ad_paths = ["/Users/numan/Library/CloudStorage/OneDrive-Personal/Google x MHacks/mhacks-google-hackthon/assets/Apple_Ad_1.mp3", 
-                      "/Users/numan/Library/CloudStorage/OneDrive-Personal/Google x MHacks/mhacks-google-hackthon/assets/Apple_Ad_2.mp3", 
-                      "/Users/numan/Library/CloudStorage/OneDrive-Personal/Google x MHacks/mhacks-google-hackthon/assets/Radio_Shack_Ad.mp3"
-                      ]
-    genai_client = setup_genai()
-    analysis_results = analyze_audio_ads(audio_ad_paths, genai_client)
-    
-    ad_script = generate_ad_script(analysis_results, context)
-    print("Generated Ad Script:")
-    print(ad_script)
-    
-    output_path = "/Users/numan/Library/CloudStorage/OneDrive-Personal/Google x MHacks/mhacks-google-hackthon/generated_ad_script.txt"
-    save_ad_script(ad_script, output_path)
-    
-    tts_output_path = "/Users/numan/Library/CloudStorage/OneDrive-Personal/Google x MHacks/mhacks-google-hackthon/ad_script_audio.mp3"
-    text_to_speech(ad_script, tts_output_path)
+        # Input fields
+        self.company_name_entry = tk.Entry(master, width=50)
+        self.company_name_entry.grid(row=0, column=1)
+        tk.Label(master, text="Company Name and Activity:").grid(row=0)
+
+        self.product_details_entry = tk.Entry(master, width=50)
+        self.product_details_entry.grid(row=1, column=1)
+        tk.Label(master, text="Product Details:").grid(row=1)
+
+        self.organization_size_entry = tk.Entry(master, width=50)
+        self.organization_size_entry.grid(row=2, column=1)
+        tk.Label(master, text="Organization Size:").grid(row=2)
+
+        self.product_differentiator_entry = tk.Entry(master, width=50)
+        self.product_differentiator_entry.grid(row=3, column=1)
+        tk.Label(master, text="Product Differentiator:").grid(row=3)
+
+        # Generate ad button
+        self.generate_button = tk.Button(master, text="Generate Ad", command=self.generate_ad)
+        self.generate_button.grid(row=4, columnspan=2)
+
+        # Status label
+        self.status_label = tk.Label(master, text="Ready")
+        self.status_label.grid(row=5, columnspan=2)
+
+        # Output text area
+        self.output_text = tk.Text(master, height=10, width=60)
+        self.output_text.grid(row=6, columnspan=2)
+
+        # Play/pause button (disabled initially)
+        self.play_button = tk.Button(master, text="Play/Pause Audio", command=self.play_pause_audio, state=tk.DISABLED)
+        self.play_button.grid(row=7, columnspan=2)
+
+    def collect_inputs(self):
+        return {
+            "company_name": self.company_name_entry.get(),
+            "product_details": self.product_details_entry.get(),
+            "organization_size": self.organization_size_entry.get(),
+            "product_differentiator": self.product_differentiator_entry.get()
+        }
+
+    def update_status(self, text):
+        self.status_label.config(text=text)
+        self.master.update()
+
+    def generate_ad(self):
+        self.update_status("Generating...")
+        user_inputs = self.collect_inputs()
+        threading.Thread(target=self.background_ad_generation, args=(user_inputs,)).start()
+
+    def background_ad_generation(self, inputs):
+        self.update_status("Processing inputs...")
+        context = (
+            f"Introducing a new product from {inputs['company_name']}, "
+            f"designed for {inputs['product_details']}. Our company size is "
+            f"{inputs['organization_size']} and we stand out by {inputs['product_differentiator']}."
+        )
+
+        # Setup Google generative AI client
+        genai_client = setup_genai()
+
+        # File paths for example, update these to where your audio files are stored or how they are generated
+        audio_ad_paths = ["/Users/numan/Library/CloudStorage/OneDrive-Personal/Google x MHacks/mhacks-google-hackthon/assets/Apple_Ad_1.mp3"]
+
+        try:
+            # Analyze the audio ads to incorporate their analysis into the ad script generation
+            analysis_results = analyze_audio_ads(audio_ad_paths, genai_client)
+            
+            # Generate the ad script using the analysis results and the user-provided context
+            ad_script = generate_ad_script(analysis_results, context)
+
+            # Display the generated ad script in the text area
+            self.output_text.insert(tk.END, ad_script)
+            self.update_status("Ad script generation complete.")
+
+            # Generate audio from the ad script
+            tts_output_path = "/Users/numan/Library/CloudStorage/OneDrive-Personal/Google x MHacks/mhacks-google-hackthon/ad_audio.mp3"
+            text_to_speech(ad_script, tts_output_path)
+
+            # Enable the play button and store the path to the generated audio for playback
+            self.generated_audio_path = tts_output_path
+            self.play_button.config(state=tk.NORMAL)
+        except Exception as e:
+            self.update_status("Failed to generate ad.")
+            logging.error(f"Error in ad generation process: {e}")
+            messagebox.showerror("Error", "Failed to generate ad. Please check the logs for more information.")
+
+
+    def play_pause_audio(self):
+        if not hasattr(self, 'player_initialized'):
+            pygame.mixer.init()
+            pygame.mixer.music.load(self.generated_audio_path)
+            self.player_initialized = True
+            self.is_playing = False
+
+        if self.is_playing:
+            pygame.mixer.music.pause()
+            self.is_playing = False
+            self.play_button.config(text="Play Audio")
+        else:
+            pygame.mixer.music.play(-1)
+            self.is_playing = True
+            self.play_button.config(text="Pause Audio")
+
+# Create the main window and pass it to the AdGeneratorApp
+root = tk.Tk()
+app = AdGeneratorApp(root)
+root.mainloop()
