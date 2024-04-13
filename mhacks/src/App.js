@@ -7,7 +7,6 @@ const App = () => {
   return (
     <div className="app-container">
       <InputWithTypewriter />
-      {/* Include other components here as needed */}
     </div>
   );
 };
