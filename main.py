@@ -1,27 +1,22 @@
-import google.generativeai as genai
-import os
-from dotenv import load_dotenv
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-load_dotenv()
+app = FastAPI()
 
-GOOGLE_API_KEY = os.environ["GOOGLE_API_KEY"]
-
-genai.configure(api_key=GOOGLE_API_KEY)
-dunkin_ad = genai.upload_file(path="assets/dunkin.mp3")
-
-prompt = "Provide a summary transcript of the audio file."
-
-model = genai.GenerativeModel("models/gemini-1.5-pro-latest")
-response = model.generate_content([prompt, dunkin_ad])
-
-print(response.text)
+# Set up CORS middleware configuration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000"
+    ],  # List of origins that are allowed to make requests
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
 
 
-"""
-ideas:
-    allow user to put some context for the ad to be generated
-    "surprise me"
-
-    simple UI
-    maybe integrate 3rd party TTS after gemini gives us output
-"""
+@app.get("/genad/")
+async def prompt_gemini(q: str = None):
+    if q is None:
+        return {"response": "No query provided"}
+    return {"response": "Your response based on the query"}
