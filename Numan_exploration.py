@@ -111,7 +111,10 @@ if __name__ == "__main__":
         f"{user_responses['organization_size']} and we stand out by {user_responses['product_differentiator']}."
     )
 
-    audio_ad_paths = ["/Users/numan/Library/CloudStorage/OneDrive-Personal/Google x MHacks/mhacks-google-hackthon/Apple_Ad_1.mp3"]
+    audio_ad_paths = ["/Users/numan/Library/CloudStorage/OneDrive-Personal/Google x MHacks/mhacks-google-hackthon/assets/Apple_Ad_1.mp3", 
+                      "/Users/numan/Library/CloudStorage/OneDrive-Personal/Google x MHacks/mhacks-google-hackthon/assets/Apple_Ad_2.mp3", 
+                      "/Users/numan/Library/CloudStorage/OneDrive-Personal/Google x MHacks/mhacks-google-hackthon/assets/Radio_Shack_Ad.mp3"
+                      ]
     genai_client = setup_genai()
     analysis_results = analyze_audio_ads(audio_ad_paths, genai_client)
     
