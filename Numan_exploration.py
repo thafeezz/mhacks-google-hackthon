@@ -163,7 +163,7 @@ class AdGeneratorApp:
         genai_client = setup_genai()
 
         # File paths for example, update these to where your audio files are stored or how they are generated
-        audio_ad_paths = ["/Users/numan/Library/CloudStorage/OneDrive-Personal/Google x MHacks/mhacks-google-hackthon/assets/Apple_Ad_1.mp3"]
+        audio_ad_paths = ["/Users/numan/Library/CloudStorage/OneDrive-Personal/GooglexMHacks/mhacks-google-hackthon/assets/Apple_Ad_1.mp3"]
 
         try:
             # Analyze the audio ads to incorporate their analysis into the ad script generation
@@ -177,7 +177,7 @@ class AdGeneratorApp:
             self.update_status("Ad script generation complete.")
 
             # Generate audio from the ad script
-            tts_output_path = "/Users/numan/Library/CloudStorage/OneDrive-Personal/Google x MHacks/mhacks-google-hackthon/ad_audio.mp3"
+            tts_output_path = "/Users/numan/Library/CloudStorage/OneDrive-Personal/GooglexMHacks/mhacks-google-hackthon/ad_audio.mp3"
             text_to_speech(ad_script, tts_output_path)
 
             # Enable the play button and store the path to the generated audio for playback

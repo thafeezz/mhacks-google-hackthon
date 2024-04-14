@@ -78,8 +78,9 @@ def generate_ad_script(analysis_results, context):
             f"Context: {context}, Summary: {summary}, Sentiment: {sentiment}"
             for _, summary, sentiment in analysis_results
         )
-        prompt = f"Generate an engaging audio ad script based on the provided context and audio analysis: '{combined_context}'. Provide only the narrator script, do not not\
-        include any reference to music or sounds, I only what what will be spoken."
+        prompt = f"Follow these instructions very closely: Generate an engaging audio ad script based \
+            on the provided context and audio analysis: '{combined_context}'. Provide only the narrator script, do not not\
+            include any reference to music or sounds, I only what what will be spoken by the narrator."
         response = model.generate_content([prompt])
         return response.text
     except Exception as e:
@@ -113,7 +114,7 @@ async def genad(user_input: UserInput):
     try:
         # Assuming you would somehow gather audio_ad_paths dynamically or from user input
         audio_ad_paths = [
-            "/Users/numan/Library/CloudStorage/OneDrive-Personal/Google x MHacks/mhacks-google-hackthon/assets/Apple_Ad_1.mp3",
+            "/Users/numan/Library/CloudStorage/OneDrive-Personal/GooglexMHacks/mhacks-google-hackthon/assets/Apple_Ad_1.mp3",
             # "Apple_Ad_2.mp3",
             # "Radio_Shack_Ad.mp3",
         ]  # This should be updated to the correct path
@@ -133,7 +134,7 @@ async def genad(user_input: UserInput):
         analysis_results = analyze_audio_ads(audio_ad_paths, genai_client)
         ad_script = generate_ad_script(analysis_results, context)
 
-        tts_output_path = "/Users/numan/Library/CloudStorage/OneDrive-Personal/Google x MHacks/mhacks-google-hackthon/mhacks/public/ad_script_audio.mp3"
+        tts_output_path = "/Users/numan/Library/CloudStorage/OneDrive-Personal/GooglexMHacks/mhacks-google-hackthon/mhacks/public/ad_script_audio.mp3"
         text_to_speech(ad_script, tts_output_path)
 
         return {"ad_script": ad_script, "audio_path": tts_output_path}
