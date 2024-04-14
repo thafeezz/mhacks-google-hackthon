@@ -47,8 +47,6 @@ const InputForm = () => {
   const togglePlayPause = () => {
     if (audioRef.current) {
       if (!isPlaying) {
-        console.log("ABOUT TO PRINT");
-        console.log(audioRef.current);
         audioRef.current.play();
         setIsPlaying(true);
       } else {
@@ -69,41 +67,43 @@ const InputForm = () => {
       {/* Form */}
       <form ref={formRef} onSubmit={handleSubmit}>
         <input type="text" name="company_name" placeholder="Company Name" />
-        <input
-          type="text"
-          name="product_details"
-          placeholder="Product Details"
-        />
-        <input
-          type="text"
-          name="organization_size"
-          placeholder="Organization Size"
-        />
-        <input
-          type="text"
-          name="product_differentiator"
-          placeholder="Product Differentiator"
-        />
+        <input type="text" name="product_details" placeholder="Product Details" />
+        <input type="text" name="organization_size" placeholder="Organization Size" />
+        <input type="text" name="product_differentiator" placeholder="Product Differentiator" />
         <button type="submit" disabled={isLoading}>
           {isLoading ? "Loading..." : "Generate Ad Script"}
         </button>
       </form>
 
-      {/* Audio player */}
+      {/* Audio player and download button */}
       <div className="audio-player">
         <audio ref={audioRef} src="/ad_script_audio.mp3" preload="auto" />
         <button onClick={togglePlayPause}>
           {isPlaying ? "Pause" : "Play"}
         </button>
+        {adScript && (
+          <button onClick={() => {
+            const link = document.createElement("a");
+            link.href = audioRef.current.src;  // Ensure the server is correctly serving this file
+            link.download = "GeneratedAd.mp3";  // Set the download file name
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }}>
+            Download Audio
+          </button>
+        )}
       </div>
 
-      {/* Ad script display */}
-      <div className="ad-script">
-        {isLoading ? (
-          <div className="loading">Loading...</div>
-        ) : (
-          <TypewriterEffect text={adScript} />
-        )}
+      {/* Ad script section */}
+      <div className="ad-script-section">
+        <div className="ad-script">
+          {isLoading ? (
+            <div className="loading">Loading...</div>
+          ) : (
+            <TypewriterEffect text={adScript} />
+          )}
+        </div>
       </div>
     </div>
   );
