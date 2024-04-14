@@ -8,6 +8,7 @@ const InputForm = () => {
   const [adScript, setAdScript] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [error, setError] = useState(null);  // Error state
 
   // Refs
   const audioRef = useRef(null);
@@ -28,16 +29,21 @@ const InputForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-
+    setError(null);  // Clear previous errors
     const data = getFormData();
 
     try {
       const response = await axios.post("http://localhost:8000/genad/", data);
       const ad_script = response.data.ad_script;
-      setAdScript(ad_script);
+      if (ad_script) {
+        setAdScript(ad_script);
+      } else {
+        throw new Error("No ad script returned");
+      }
     } catch (error) {
       console.error("Error calling API:", error);
-      setAdScript("Failed to fetch data.");
+      setError("Failed to fetch data. Please try again.");
+      setAdScript("");  // Ensuring adScript is empty in case of error
     }
 
     setIsLoading(false);
@@ -64,7 +70,6 @@ const InputForm = () => {
 
   return (
     <div className="input-form">
-      {/* Form */}
       <form ref={formRef} onSubmit={handleSubmit}>
         <input type="text" name="company_name" placeholder="Company Name" />
         <input type="text" name="product_details" placeholder="Product Details" />
@@ -74,18 +79,17 @@ const InputForm = () => {
           {isLoading ? "Loading..." : "Generate Ad Script"}
         </button>
       </form>
-
-      {/* Audio player and download button */}
+  
       <div className="audio-player">
         <audio ref={audioRef} src="/ad_script_audio.mp3" preload="auto" />
         <button onClick={togglePlayPause}>
           {isPlaying ? "Pause" : "Play"}
         </button>
-        {adScript && (
+        {adScript && !error && (
           <button onClick={() => {
             const link = document.createElement("a");
-            link.href = audioRef.current.src;  // Ensure the server is correctly serving this file
-            link.download = "GeneratedAd.mp3";  // Set the download file name
+            link.href = audioRef.current.src;
+            link.download = "GeneratedAd.mp3";
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -94,19 +98,23 @@ const InputForm = () => {
           </button>
         )}
       </div>
-
-      {/* Ad script section */}
+  
       <div className="ad-script-section">
-        <div className="ad-script">
-          {isLoading ? (
-            <div className="loading">Loading...</div>
-          ) : (
-            <TypewriterEffect text={adScript} />
-          )}
-        </div>
+        {error ? (
+          <div className="error">{error}</div>
+        ) : (
+          <div className="ad-script">
+            {isLoading ? (
+              <div className="loading">Loading...</div>
+            ) : (
+              <TypewriterEffect text={adScript} />
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
 };
+
 
 export default InputForm;
