@@ -83,7 +83,13 @@ def text_to_speech(text, output_file):
 @app.post("/genad/")
 async def genad(user_input: UserInput):
     try:
-        audio_ad_paths = ["/Users/numan/Library/CloudStorage/OneDrive-Personal/GooglexMHacks/mhacks-google-hackthon/assets/Apple_Ad_1.mp3"]  # Update to the correct path
+        # Assuming you would somehow gather audio_ad_paths dynamically or from user input
+        audio_ad_paths = [
+            "./assets/Apple_Ad_1.mp3",
+            # "Apple_Ad_2.mp3",
+            # "Radio_Shack_Ad.mp3",
+        ]  # This should be updated to the correct path
+
         genai_client = setup_genai()
         context = (
             f"Introducing a new product from {user_input.company_name}, "
@@ -92,7 +98,8 @@ async def genad(user_input: UserInput):
         )
         analysis_results = analyze_audio_ads(audio_ad_paths, genai_client)
         ad_script = generate_ad_script(analysis_results, context)
-        tts_output_path = "/Users/numan/Library/CloudStorage/OneDrive-Personal/GooglexMHacks/mhacks-google-hackthon/mhacks/public/ad_script_audio.mp3"
+
+        tts_output_path = "./mhacks/public/ad_script_audio.mp3"
         text_to_speech(ad_script, tts_output_path)
         return {"ad_script": ad_script, "audio_path": f"/public/ad_script_audio.mp3"}
     except Exception as e:
