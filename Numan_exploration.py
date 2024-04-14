@@ -93,46 +93,47 @@ class AdGeneratorApp:
         self.master = master
         master.title("Ad Generator")
 
-        # Initialize player-related attributes
+        # Initialize player attributes
         self.player_initialized = False
         self.is_playing = False
-        self.generated_audio_path = None
 
-        # Initialize the font correctly
-        text_font = tkfont.Font(family="Courier", size=12)  # Define a monospaced font for better alignment
+        # Initialize the font for the inputs and buttons
+        input_font = tkfont.Font(family="Helvetica", size=10)
+        button_font = tkfont.Font(family="Helvetica", size=12, weight='bold')
+        label_font = tkfont.Font(family="Helvetica", size=12, slant='italic')
 
-        # Input fields
-        self.company_name_entry = tk.Entry(master, width=50)
+        # Input fields with enhanced styling
+        self.company_name_entry = tk.Entry(master, width=50, bg='lightgray', fg='black', font=input_font)
         self.company_name_entry.grid(row=0, column=1)
-        tk.Label(master, text="Company Name and Background:").grid(row=0)
+        tk.Label(master, text="Company Name and Background:", font=label_font).grid(row=0)
 
-        self.product_details_entry = tk.Entry(master, width=50)
+        self.product_details_entry = tk.Entry(master, width=50, bg='lightgray', fg='black', font=input_font)
         self.product_details_entry.grid(row=1, column=1)
-        tk.Label(master, text="Product Details:").grid(row=1)
+        tk.Label(master, text="Product Details:", font=label_font).grid(row=1)
 
-        self.organization_size_entry = tk.Entry(master, width=50)
+        self.organization_size_entry = tk.Entry(master, width=50, bg='lightgray', fg='black', font=input_font)
         self.organization_size_entry.grid(row=2, column=1)
-        tk.Label(master, text="Organization Size:").grid(row=2)
+        tk.Label(master, text="Organization Size:", font=label_font).grid(row=2)
 
-        self.product_differentiator_entry = tk.Entry(master, width=50)
+        self.product_differentiator_entry = tk.Entry(master, width=50, bg='lightgray', fg='black', font=input_font)
         self.product_differentiator_entry.grid(row=3, column=1)
-        tk.Label(master, text="Product Differentiator:").grid(row=3)
+        tk.Label(master, text="Product Differentiator:", font=label_font).grid(row=3)
 
-        # Generate ad button
-        self.generate_button = tk.Button(master, text="Generate Ad", command=self.generate_ad)
+        # Buttons with enhanced styling
+        self.generate_button = tk.Button(master, text="Generate Ad", command=self.generate_ad, bg='white', fg='black', font=button_font, activeforeground='black', activebackground='white')
         self.generate_button.grid(row=4, columnspan=2)
 
-        # Status label
-        self.status_label = tk.Label(master, text="Ready")
+        self.play_button = tk.Button(master, text="Play/Pause Audio", command=self.play_pause_audio, state=tk.DISABLED, bg='white', fg='black', font=button_font, activeforeground='black', activebackground='white')
+        self.play_button.grid(row=7, columnspan=2)
+
+        # Status label with enhanced styling
+        self.status_label = tk.Label(master, text="Ready", bg='lightblue', fg='black', font=label_font)
         self.status_label.grid(row=5, columnspan=2)
 
-        # Output text area (now scrollable)
-        self.output_text = ScrolledText(master, height=10, width=60, wrap="word", font=text_font)
+        # Output text area with enhanced styling
+        text_font = tkfont.Font(family="Courier", size=12)  # Define a monospaced font for better alignment
+        self.output_text = ScrolledText(master, height=10, width=60, wrap="word", font=text_font, bg='black', fg='white')
         self.output_text.grid(row=6, columnspan=2)
-
-        # Example button to control audio playback
-        self.play_button = tk.Button(master, text="Play/Pause Audio", command=self.play_pause_audio, state=tk.DISABLED)
-        self.play_button.grid(row=7, columnspan=2)
 
     def collect_inputs(self):
         return {
@@ -141,7 +142,6 @@ class AdGeneratorApp:
             "organization_size": self.organization_size_entry.get(),
             "product_differentiator": self.product_differentiator_entry.get()
         }
-
     def update_status(self, text):
         self.status_label.config(text=text)
         self.master.update()
@@ -153,6 +153,10 @@ class AdGeneratorApp:
 
     def background_ad_generation(self, inputs):
         self.update_status("Processing inputs...")
+        
+        # Schedule an update to the status label after 5 seconds
+        self.master.after(5000, self.update_status, "Training Gemini on classic ads...")
+        
         context = (
             f"Introducing a new product from {inputs['company_name']}, "
             f"designed for {inputs['product_details']}. Our company size is "
@@ -176,6 +180,9 @@ class AdGeneratorApp:
             self.output_text.insert(tk.END, ad_script)
             self.update_status("Ad script generation complete.")
 
+            # Schedule an update to the status label before generating audio
+            self.master.after(0, self.update_status, "Generating audio...")
+
             # Generate audio from the ad script
             tts_output_path = "/Users/numan/Library/CloudStorage/OneDrive-Personal/GooglexMHacks/mhacks-google-hackthon/ad_audio.mp3"
             text_to_speech(ad_script, tts_output_path)
@@ -183,6 +190,7 @@ class AdGeneratorApp:
             # Enable the play button and store the path to the generated audio for playback
             self.generated_audio_path = tts_output_path
             self.play_button.config(state=tk.NORMAL)
+            self.update_status("Ad generation complete.")
         except Exception as e:
             self.update_status("Failed to generate ad.")
             logging.error(f"Error in ad generation process: {e}")
