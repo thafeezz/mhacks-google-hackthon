@@ -12,6 +12,8 @@ from tkinter import font as tkfont
 import threading
 import pygame
 
+pygame.mixer.init()
+
 # Load environment variables
 load_dotenv()
 
@@ -91,6 +93,11 @@ class AdGeneratorApp:
         self.master = master
         master.title("Ad Generator")
 
+        # Initialize player-related attributes
+        self.player_initialized = False
+        self.is_playing = False
+        self.generated_audio_path = None
+
         # Initialize the font correctly
         text_font = tkfont.Font(family="Courier", size=12)  # Define a monospaced font for better alignment
 
@@ -123,7 +130,7 @@ class AdGeneratorApp:
         self.output_text = ScrolledText(master, height=10, width=60, wrap="word", font=text_font)
         self.output_text.grid(row=6, columnspan=2)
 
-        # Play/pause button (disabled initially)
+        # Example button to control audio playback
         self.play_button = tk.Button(master, text="Play/Pause Audio", command=self.play_pause_audio, state=tk.DISABLED)
         self.play_button.grid(row=7, columnspan=2)
 
@@ -183,20 +190,34 @@ class AdGeneratorApp:
 
 
     def play_pause_audio(self):
-        if not hasattr(self, 'player_initialized'):
-            pygame.mixer.init()
+        if not self.player_initialized:
             pygame.mixer.music.load(self.generated_audio_path)
+            pygame.mixer.music.set_endevent(pygame.USEREVENT)  # Set an event to trigger at the end of the audio
             self.player_initialized = True
-            self.is_playing = False
 
         if self.is_playing:
             pygame.mixer.music.pause()
             self.is_playing = False
             self.play_button.config(text="Play Audio")
         else:
-            pygame.mixer.music.play(-1)
+            pygame.mixer.music.play()
             self.is_playing = True
             self.play_button.config(text="Pause Audio")
+            self.monitor_audio()
+
+    def monitor_audio(self):
+        """ Monitor the state of the audio to stop it when finished. """
+        if pygame.mixer.music.get_busy():  # Check if the music stream is playing
+            self.master.after(100, self.monitor_audio)  # Recheck after 100ms
+        else:
+            self.audio_finished()
+
+    def audio_finished(self):
+        """ Handle audio finishing playback. """
+        self.is_playing = False
+        self.play_button.config(text="Play Audio")
+        messagebox.showinfo("Playback Finished", "The audio ad has finished playing.")
+
 
 # Create the main window and pass it to the AdGeneratorApp
 root = tk.Tk()
