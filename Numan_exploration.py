@@ -2,12 +2,13 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 import os
 import logging
-import requests
 import pandas as pd
 import openai
 from pathlib import Path
 import tkinter as tk
-from tkinter import messagebox, filedialog
+from tkinter import messagebox
+from tkinter.scrolledtext import ScrolledText
+from tkinter import font as tkfont
 import threading
 import pygame
 
@@ -90,10 +91,13 @@ class AdGeneratorApp:
         self.master = master
         master.title("Ad Generator")
 
+        # Initialize the font correctly
+        text_font = tkfont.Font(family="Courier", size=12)  # Define a monospaced font for better alignment
+
         # Input fields
         self.company_name_entry = tk.Entry(master, width=50)
         self.company_name_entry.grid(row=0, column=1)
-        tk.Label(master, text="Company Name and Activity:").grid(row=0)
+        tk.Label(master, text="Company Name and Background:").grid(row=0)
 
         self.product_details_entry = tk.Entry(master, width=50)
         self.product_details_entry.grid(row=1, column=1)
@@ -115,8 +119,8 @@ class AdGeneratorApp:
         self.status_label = tk.Label(master, text="Ready")
         self.status_label.grid(row=5, columnspan=2)
 
-        # Output text area
-        self.output_text = tk.Text(master, height=10, width=60)
+        # Output text area (now scrollable)
+        self.output_text = ScrolledText(master, height=10, width=60, wrap="word", font=text_font)
         self.output_text.grid(row=6, columnspan=2)
 
         # Play/pause button (disabled initially)
