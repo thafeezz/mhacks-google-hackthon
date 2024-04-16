@@ -61,7 +61,8 @@ def generate_ad_script(analysis_results, context):
         )
         prompt = f"Follow these instructions very closely: Generate an engaging audio ad script based \
             on the provided context and audio analysis: '{combined_context}'. Provide only the narrator script, do not not\
-            include any reference to music or sounds, I only what what will be spoken by the narrator."
+            include any reference to music or sounds, I only what what will be spoken by the narrator. Give me one solid script and\
+            no other  alternatives."
         response = model.generate_content([prompt])
         return response.text
     except Exception as e:
